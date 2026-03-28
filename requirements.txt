@@ -1,0 +1,9 @@
+flask>=3.0
+flask-cors
+textblob
+vaderSentiment
+requests
+python-dotenv
+gunicorn
+beautifulsoup4
+lxml

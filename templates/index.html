@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="AI-powered review analysis. Understand what customers really feel - positive, negative, neutral - with confidence scores, trust ratings, and smart buy recommendations.">
+  <title>SentioAI - Intelligent Sentiment Analysis</title>
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='assets/favicon.svg') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+  <!-- Toast -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Atmospheric background mesh -->
+  <div class="site-mesh-bg" aria-hidden="true"></div>
+
+  <!-- NAVBAR -->
+  <nav class="navbar" id="navbar" role="navigation" aria-label="Main navigation">
+    <div class="navbar__inner">
+
+      <a href="/" class="navbar__brand" aria-label="SentioAI home">
+        <div class="navbar__logo-wrap">
+          <img src="{{ url_for('static', filename='assets/logo.png') }}" alt="SentioAI" width="34" height="34">
+        </div>
+        <span class="navbar__wordmark">Sentio<em>AI</em></span>
+      </a>
+
+      <ul class="navbar__links" role="list">
+        <li><a href="#input-card" class="navbar__link" id="nav-analyze">Analyze</a></li>
+        <li><a href="#history-card" class="navbar__link" id="nav-history">History</a></li>
+        <li>
+          <a href="https://openrouter.ai" target="_blank" rel="noopener" class="navbar__link navbar__link--badge" id="nav-openrouter">
+            AI Engine
+            <span class="navbar__ext-icon">&#8599;</span>
+          </a>
+        </li>
+      </ul>
+
+      <div class="navbar__actions">
+        <button class="navbar__btn-login" id="btn-open-login">Log in</button>
+        <button class="navbar__btn-signup" id="btn-open-signup">
+          <span>Get started</span>
+          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M2 7h10M8 3l4 4-4 4"/>
+          </svg>
+        </button>
+      </div>
+
+      <button class="navbar__hamburger" id="navbar-hamburger"
+              aria-label="Toggle menu" aria-expanded="false" aria-controls="navbar-mobile">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+
+    <div class="navbar__mobile" id="navbar-mobile" aria-hidden="true">
+      <ul role="list">
+        <li><a href="#input-card" class="navbar__link">Analyze</a></li>
+        <li><a href="#history-card" class="navbar__link">History</a></li>
+        <li><a href="https://openrouter.ai" target="_blank" rel="noopener" class="navbar__link">AI Engine &#8599;</a></li>
+        <li class="navbar__mobile-divider"></li>
+        <li><button class="navbar__link" id="btn-open-login-mobile">Log in</button></li>
+        <li><button class="navbar__btn-signup navbar__btn-signup--mobile" id="btn-open-signup-mobile">Get started</button></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- AUTH MODAL -->
+  <div class="auth-overlay" id="auth-overlay" role="dialog" aria-modal="true"
+       aria-labelledby="auth-modal-title" hidden>
+    <div class="auth-modal" id="auth-modal">
+
+      <button class="auth-modal__close" id="auth-close" aria-label="Close">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" aria-hidden="true">
+          <path d="M15 5L5 15M5 5l10 10"/>
+        </svg>
+      </button>
+
+      <div class="auth-modal__glow" aria-hidden="true"></div>
+
+      <div class="auth-modal__brand">
+        <div class="auth-modal__logo">
+          <img src="{{ url_for('static', filename='assets/logo.png') }}" alt="SentioAI" width="44" height="44" style="border-radius:12px">
+        </div>
+        <span class="auth-modal__brand-name">SentioAI</span>
+      </div>
+
+      <div class="auth-tabs" role="tablist">
+        <button class="auth-tab auth-tab--active" id="tab-login" role="tab"
+                aria-selected="true" aria-controls="panel-login">Log In</button>
+        <button class="auth-tab" id="tab-signup" role="tab"
+                aria-selected="false" aria-controls="panel-signup">Sign Up</button>
+        <div class="auth-tab__indicator" id="auth-tab-indicator"></div>
+      </div>
+
+      <!-- Login Panel -->
+      <div class="auth-panel" id="panel-login" role="tabpanel" aria-labelledby="tab-login">
+        <h2 class="auth-modal__title" id="auth-modal-title">Welcome back</h2>
+        <p class="auth-modal__subtitle">Sign in to continue your analysis</p>
+
+        <div class="auth-hint-box">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <circle cx="8" cy="8" r="7"/><path d="M8 7v4M8 5v.5"/>
+          </svg>
+          Demo: <strong>demo@ai.com</strong> / <strong>password123</strong>
+        </div>
+
+        <form id="login-form" class="auth-form" novalidate>
+          <div class="auth-field">
+            <label for="login-email" class="auth-label">Email</label>
+            <div class="auth-input-wrap">
+              <svg class="auth-input-icon" viewBox="0 0 20 20" fill="none"
+                   stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                <path d="M3 5h14l-7 7-7-7z"/><rect x="3" y="5" width="14" height="11" rx="1"/>
+              </svg>
+              <input type="email" id="login-email" class="auth-input"
+                     placeholder="you@example.com" autocomplete="email" required>
+            </div>
+            <span class="auth-field-error" id="login-email-err" role="alert"></span>
+          </div>
+
+          <div class="auth-field">
+            <label for="login-password" class="auth-label">
+              Password
+              <a href="#" class="auth-label__link" id="forgot-link">Forgot?</a>
+            </label>
+            <div class="auth-input-wrap">
+              <svg class="auth-input-icon" viewBox="0 0 20 20" fill="none"
+                   stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                <rect x="4" y="9" width="12" height="9" rx="1.5"/>
+                <path d="M7 9V6a3 3 0 0 1 6 0v3"/>
+              </svg>
+              <input type="password" id="login-password" class="auth-input"
+                     placeholder="Enter your password" autocomplete="current-password" required>
+              <button type="button" class="auth-eye" id="toggle-login-pw" aria-label="Toggle password">
+                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                  <path d="M1 10s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z"/>
+                  <circle cx="10" cy="10" r="2.5"/>
+                </svg>
+              </button>
+            </div>
+            <span class="auth-field-error" id="login-pw-err" role="alert"></span>
+          </div>
+
+          <div class="auth-error" id="login-error" role="alert" hidden></div>
+
+          <button type="submit" class="auth-submit" id="login-submit">
+            <span class="spinner" id="login-spinner"></span>
+            <span id="login-submit-text">Sign In</span>
+          </button>
+        </form>
+        <p class="auth-footer-text">
+          No account? <button class="auth-switch" id="switch-to-signup">Sign up free</button>
+        </p>
+      </div>
+
+      <!-- Sign Up Panel -->
+      <div class="auth-panel" id="panel-signup" role="tabpanel"
+           aria-labelledby="tab-signup" hidden>
+        <h2 class="auth-modal__title">Create account</h2>
+        <p class="auth-modal__subtitle">Start analyzing reviews in seconds</p>
+
+        <form id="signup-form" class="auth-form" novalidate>
+          <div class="auth-field">
+            <label for="signup-name" class="auth-label">Full name</label>
+            <div class="auth-input-wrap">
+              <svg class="auth-input-icon" viewBox="0 0 20 20" fill="none"
+                   stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                <circle cx="10" cy="7" r="3"/><path d="M2 18c0-4 3.6-6 8-6s8 2 8 6"/>
+              </svg>
+              <input type="text" id="signup-name" class="auth-input"
+                     placeholder="Jane Smith" autocomplete="name" required>
+            </div>
+            <span class="auth-field-error" id="signup-name-err" role="alert"></span>
+          </div>
+
+          <div class="auth-field">
+            <label for="signup-email" class="auth-label">Email</label>
+            <div class="auth-input-wrap">
+              <svg class="auth-input-icon" viewBox="0 0 20 20" fill="none"
+                   stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                <path d="M3 5h14l-7 7-7-7z"/><rect x="3" y="5" width="14" height="11" rx="1"/>
+              </svg>
+              <input type="email" id="signup-email" class="auth-input"
+                     placeholder="you@example.com" autocomplete="email" required>
+            </div>
+            <span class="auth-field-error" id="signup-email-err" role="alert"></span>
+          </div>
+
+          <div class="auth-field">
+            <label for="signup-password" class="auth-label">Password</label>
+            <div class="auth-input-wrap">
+              <svg class="auth-input-icon" viewBox="0 0 20 20" fill="none"
+                   stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                <rect x="4" y="9" width="12" height="9" rx="1.5"/>
+                <path d="M7 9V6a3 3 0 0 1 6 0v3"/>
+              </svg>
+              <input type="password" id="signup-password" class="auth-input"
+                     placeholder="8+ characters" autocomplete="new-password" required>
+              <button type="button" class="auth-eye" id="toggle-signup-pw" aria-label="Toggle password">
+                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                  <path d="M1 10s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z"/>
+                  <circle cx="10" cy="10" r="2.5"/>
+                </svg>
+              </button>
+            </div>
+            <span class="auth-field-error" id="signup-pw-err" role="alert"></span>
+          </div>
+
+          <div class="auth-error" id="signup-error" role="alert" hidden></div>
+
+          <button type="submit" class="auth-submit" id="signup-submit">
+            <span class="spinner" id="signup-spinner"></span>
+            <span id="signup-submit-text">Create Account</span>
+          </button>
+        </form>
+        <p class="auth-footer-text">
+          Have an account? <button class="auth-switch" id="switch-to-login">Log in</button>
+        </p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- HERO -->
+  <header class="hero" id="hero-section">
+    <div class="hero__mesh-bg" aria-hidden="true"></div>
+    <div class="hero__noise-overlay" aria-hidden="true"></div>
+    <canvas id="trail-canvas" aria-hidden="true" style="position:absolute;inset:0;z-index:1;pointer-events:none;"></canvas>
+    <div class="hero__mouse-glow" id="hero-mouse-glow" aria-hidden="true"></div>
+    <div class="hero__inner">
+
+      <!-- Floating pill badge -->
+      <div class="hero__pill" role="presentation">
+        <span class="hero__pill-dot"></span>
+        <span>Quick Scan &middot; Deep AI &middot; Trust Score</span>
+        <span class="hero__pill-sep">&middot;</span>
+        <span class="hero__pill-live">Live</span>
+      </div>
+
+      <h1 class="hero__title">
+        Decode What Your<br>
+        <span class="hero__title-gradient">Customers Really Feel</span>
+      </h1>
+
+      <p class="hero__subtitle">
+        Paste any customer reviews. Get instant sentiment scores, trust ratings,
+        and smart buy recommendations - in seconds.
+      </p>
+
+      <div class="hero__cta-row">
+        <button class="hero__cta-primary" id="hero-cta-signup">
+          Start Analyzing Free
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3 8h10M9 4l4 4-4 4"/>
+          </svg>
+        </button>
+        <a href="#input-card" class="hero__cta-ghost">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="8" cy="8" r="7"/><path d="M6 8l2 2 4-4"/>
+          </svg>
+          Try it now
+        </a>
+      </div>
+
+      <!-- Feature pills row -->
+      <div class="hero__feature-pills" aria-label="Key features">
+        <span class="feature-pill feature-pill--green">
+          <svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><circle cx="6" cy="6" r="6"/></svg>
+          Instant Scan
+        </span>
+        <span class="feature-pill feature-pill--blue">
+          <svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><circle cx="6" cy="6" r="6"/></svg>
+          Sentiment Engine
+        </span>
+        <span class="feature-pill feature-pill--purple">
+          <svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><circle cx="6" cy="6" r="6"/></svg>
+          AI Deep Analysis
+        </span>
+        <span class="feature-pill feature-pill--orange">
+          <svg viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><circle cx="6" cy="6" r="6"/></svg>
+          Trust Scoring
+        </span>
+      </div>
+
+      <!-- Stats strip -->
+      <dl class="hero__stats">
+        <div class="hero__stat">
+          <dt class="hero__stat-num">20+</dt>
+          <dd class="hero__stat-label">Reviews / batch</dd>
+        </div>
+        <div class="hero__stat-sep" aria-hidden="true"></div>
+        <div class="hero__stat">
+          <dt class="hero__stat-num">3</dt>
+          <dd class="hero__stat-label">Sentiment classes</dd>
+        </div>
+        <div class="hero__stat-sep" aria-hidden="true"></div>
+        <div class="hero__stat">
+          <dt class="hero__stat-num">2</dt>
+          <dd class="hero__stat-label">AI engines</dd>
+        </div>
+        <div class="hero__stat-sep" aria-hidden="true"></div>
+        <div class="hero__stat">
+          <dt class="hero__stat-num">100%</dt>
+          <dd class="hero__stat-label">Free to use</dd>
+        </div>
+      </dl>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main class="container">
+
+    <!-- Input Card -->
+    <section class="glass-card" id="input-card">
+      <div class="glass-card__header">
+        <div class="glass-card__icon glass-card__icon--purple">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor"
+               stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M17 10H3M12 5l5 5-5 5"/>
+          </svg>
+        </div>
+        <h2 class="glass-card__title">Analyze Reviews</h2>
+        <span class="glass-card__badge" id="review-count-badge">0 / 20</span>
+      </div>
+
+      <!-- Engine toggle -->
+      <div class="engine-toggle" role="group" aria-label="Select analysis engine">
+        <button type="button" class="engine-toggle__btn engine-toggle__btn--active"
+                data-engine="textblob" id="engine-textblob">
+          <span class="engine-toggle__indicator"></span>
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"
+               stroke-linecap="round" aria-hidden="true">
+            <path d="M2 4h12M2 8h8M2 12h10"/>
+          </svg>
+          Quick Scan
+        </button>
+        <button type="button" class="engine-toggle__btn"
+                data-engine="openrouter" id="engine-openrouter">
+          <span class="engine-toggle__indicator"></span>
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"
+               stroke-linecap="round" aria-hidden="true">
+            <circle cx="8" cy="8" r="6"/>
+            <path d="M8 5v3l2 2"/>
+          </svg>
+          AI Deep Analysis
+        </button>
+      </div>
+
+      <!-- Product search (OpenRouter only) -->
+      <div id="product-search-group" class="product-search" style="display: none;">
+        <div class="product-search__row">
+          <div class="product-search__input-wrap">
+            <svg class="product-search__icon" viewBox="0 0 20 20" fill="none"
+                 stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+              <circle cx="9" cy="9" r="6"/><path d="M13 13l4 4"/>
+            </svg>
+            <input type="text" id="product-input" class="product-search__input"
+                   placeholder="e.g. boAt Airdopes 141, iPhone 15, Samsung S24..." aria-label="Product name">
+          </div>
+          <button type="button" class="btn btn--glow" id="product-btn">
+            <span class="spinner" id="product-spinner"></span>
+            <span id="product-btn-text">Analyze Product</span>
+          </button>
+        </div>
+        <p class="product-search__hint">
+          Our AI will research this product, generate realistic reviews, compare prices &amp; give a buy/skip verdict
+        </p>
+      </div>
+
+      <!-- Textarea -->
+      <div class="textarea-wrap">
+        <label for="reviews-input" class="sr-only">Enter reviews, one per line</label>
+        <textarea
+          id="reviews-input"
+          class="textarea"
+          placeholder="This product is amazing! Works perfectly.&#10;Terrible quality. Broke after 2 days.&#10;It is okay, nothing special.&#10;&#10;Enter one review per line  &middot;  max 20"
+          rows="7"
+          aria-label="Enter product reviews, one per line"
+        ></textarea>
+        <div class="textarea-footer">
+          <span class="textarea-hint">Ctrl+Enter to analyze</span>
+          <span id="review-count" class="textarea-count">0 / 20 reviews</span>
+        </div>
+      </div>
+
+      <!-- Action buttons -->
+      <div class="btn-row">
+        <button type="button" class="btn btn--primary" id="analyze-btn">
+          <span class="spinner" id="btn-spinner"></span>
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="14 8 10 8 8.5 13 5.5 3 4 8 2 8"/>
+          </svg>
+          <span id="btn-text">Analyze Reviews</span>
+        </button>
+        <button type="button" class="btn btn--ghost" id="clear-btn">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 4L4 12M4 4l8 8"/>
+          </svg>
+          Clear
+        </button>
+      </div>
+    </section>
+
+    <!-- History Card -->
+    <section class="glass-card history-card" id="history-card">
+      <div class="glass-card__header">
+        <div class="glass-card__icon glass-card__icon--orange">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor"
+               stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="10" cy="10" r="8"/>
+            <polyline points="10 6 10 10 13 12"/>
+          </svg>
+        </div>
+        <h2 class="glass-card__title">Session History</h2>
+        <button type="button" class="btn btn--danger-ghost" id="clear-history-btn">Clear all</button>
+      </div>
+
+      <div class="history-stats">
+        <div class="history-stat">
+          <span class="history-stat__num" id="history-total">0</span>
+          <span class="history-stat__lbl">Total</span>
+        </div>
+        <div class="history-stat">
+          <span class="history-stat__num history-stat__num--pos" id="history-positive">0</span>
+          <span class="history-stat__lbl">Positive</span>
+        </div>
+        <div class="history-stat">
+          <span class="history-stat__num history-stat__num--neg" id="history-negative">0</span>
+          <span class="history-stat__lbl">Negative</span>
+        </div>
+        <div class="history-stat">
+          <span class="history-stat__num history-stat__num--neu" id="history-neutral">0</span>
+          <span class="history-stat__lbl">Neutral</span>
+        </div>
+      </div>
+
+      <div class="history-bar-track">
+        <div class="history-bar">
+          <div class="history-bar__pos" id="history-bar-pos" style="width:0%"></div>
+          <div class="history-bar__neg" id="history-bar-neg" style="width:0%"></div>
+          <div class="history-bar__neu" id="history-bar-neu" style="width:0%"></div>
+        </div>
+      </div>
+      <p class="history-meta" id="history-meta">No analysis sessions yet</p>
+    </section>
+
+    <!-- Loading Skeleton -->
+    <div id="loading-skeleton" class="skeleton">
+      <div class="glass-card" style="margin-top:24px">
+        <div class="skel-line"></div>
+        <div class="skel-line skel-line--md"></div>
+        <div class="skel-line skel-line--sm"></div>
+        <div class="skel-line skel-line--md" style="margin-top:16px"></div>
+        <div class="skel-line skel-line--sm"></div>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <section id="results-section" class="results-section" aria-live="polite">
+
+      <!-- Product Info Card -->
+      <div class="glass-card" id="product-info-card" style="display:none;">
+        <div class="glass-card__header">
+          <div class="glass-card__icon glass-card__icon--blue">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor"
+                 stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M4 2h8l5 5v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1z"/>
+              <polyline points="12 2 12 7 19 7"/>
+            </svg>
+          </div>
+          <h2 class="glass-card__title" id="product-title">Product Details</h2>
+        </div>
+        <p class="product-description" id="product-description"></p>
+        <div class="product-rating-row">
+          <span class="product-rating-value" id="product-rating">0.0</span>
+          <div class="product-stars" id="product-stars"></div>
+          <span class="product-rating-label">/ 5.0</span>
+        </div>
+        <div class="price-table-wrapper">
+          <table class="price-table" id="price-table">
+            <thead><tr><th>Source</th><th>Price</th><th>Note</th></tr></thead>
+            <tbody id="price-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Analysis Results -->
+      <div class="glass-card">
+        <div class="glass-card__header">
+          <div class="glass-card__icon glass-card__icon--purple">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor"
+                 stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polyline points="18 10 14 10 11.5 17 7.5 3 5 10 2 10"/>
+            </svg>
+          </div>
+          <h2 class="glass-card__title">Analysis Results</h2>
+        </div>
+        <div id="reviews-list"></div>
+        <p id="engine-note" class="engine-note" style="display:none;"></p>
+      </div>
+
+      <!-- Summary -->
+      <div class="glass-card">
+        <div class="glass-card__header">
+          <div class="glass-card__icon glass-card__icon--green">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor"
+                 stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M18 12.5A8 8 0 1 1 7 2.8"/><path d="M18 12.5A8 8 0 0 0 10 4v8l8 .5z"/>
+            </svg>
+          </div>
+          <h2 class="glass-card__title">Summary</h2>
+        </div>
+        <div class="summary-grid">
+          <div>
+            <p id="summary-statement" class="summary-statement"></p>
+            <div class="stat-cards">
+              <div class="stat-card stat-card--pos">
+                <div class="stat-card__num" id="stat-positive">0</div>
+                <div class="stat-card__lbl">Positive</div>
+              </div>
+              <div class="stat-card stat-card--neg">
+                <div class="stat-card__num" id="stat-negative">0</div>
+                <div class="stat-card__lbl">Negative</div>
+              </div>
+              <div class="stat-card stat-card--neu">
+                <div class="stat-card__num" id="stat-neutral">0</div>
+                <div class="stat-card__lbl">Neutral</div>
+              </div>
+            </div>
+          </div>
+          <div class="chart-container">
+            <canvas id="sentiment-chart" aria-label="Sentiment distribution chart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recommendation -->
+      <div class="glass-card" id="recommendation-card" style="display:none;">
+        <div class="glass-card__header">
+          <div class="glass-card__icon glass-card__icon--orange">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor"
+                 stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M11 7V4a2 2 0 0 0-2-2L6 9v9h8.7a1.5 1.5 0 0 0 1.5-1.3l1-7A1.5 1.5 0 0 0 15.7 8H11zM6 18H4a1.5 1.5 0 0 1-1.5-1.5V10A1.5 1.5 0 0 1 4 8.5h2"/>
+            </svg>
+          </div>
+          <h2 class="glass-card__title">AI Recommendation</h2>
+        </div>
+        <div class="recommendation-content">
+          <div class="recommendation-header">
+            <span class="rec-badge" id="rec-verdict-badge">--</span>
+            <span class="rec-confidence" id="rec-confidence">0%</span>
+          </div>
+          <p class="rec-explanation" id="rec-explanation"></p>
+        </div>
+      </div>
+
+      <!-- Trust Score -->
+      <div class="glass-card" id="trust-card" style="display:none;">
+        <div class="glass-card__header">
+          <div class="glass-card__icon glass-card__icon--blue">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor"
+                 stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M10 18s6-3 6-8V4l-6-2-6 2v6c0 5 6 8 6 8z"/>
+            </svg>
+          </div>
+          <h2 class="glass-card__title">Review Trust Score</h2>
+        </div>
+        <div class="trust-content">
+          <div class="trust-ring-wrap">
+            <svg class="trust-ring" viewBox="0 0 120 120">
+              <circle class="trust-ring__bg" cx="60" cy="60" r="52"/>
+              <circle class="trust-ring__fill" id="trust-progress" cx="60" cy="60" r="52"
+                      stroke-dasharray="326.73" stroke-dashoffset="326.73"/>
+              <text x="60" y="55" class="trust-ring__val" id="trust-value">0%</text>
+              <text x="60" y="72" class="trust-ring__lbl">TRUST</text>
+            </svg>
+          </div>
+          <p class="trust-notes" id="trust-notes"></p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer__inner">
+      <div class="footer__brand">
+        <svg viewBox="0 0 20 20" fill="none" aria-hidden="true" width="18" height="18">
+          <rect width="20" height="20" rx="6" fill="url(#fg)"/>
+          <polyline points="15 8 12 8 10.5 14 7 4 5 8 2 8"
+            stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <defs>
+            <linearGradient id="fg" x1="0" y1="0" x2="20" y2="20" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#D4A853"/>
+              <stop offset="100%" stop-color="#0D9B6A"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <span>SentioAI</span>
+      </div>
+      <p class="footer__copy">
+        Quick Scan &amp; AI Deep Analysis
+        &middot; <a href="https://openrouter.ai" target="_blank" rel="noopener">Explore AI Models</a>
+      </p>
+      <div class="footer__links">
+        <a href="#" class="footer__link">Privacy</a>
+        <a href="#" class="footer__link">Terms</a>
+        <button class="footer__link" id="footer-login-btn">Sign In</button>
+      </div>
+    </div>
+  </footer>
+
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+  <script>
+    /* Navbar scroll transparency */
+    (function(){
+      const nav = document.getElementById('navbar');
+      if(!nav) return;
+      let ticking = false;
+      window.addEventListener('scroll', function(){
+        if(!ticking){
+          requestAnimationFrame(function(){
+            nav.classList.toggle('navbar--scrolled', window.scrollY > 40);
+            ticking = false;
+          });
+          ticking = true;
+        }
+      });
+    })();
+
+    /* =======================================================
+       Atmospheric Fog Canvas -- Ultra Hover Edition
+       ======================================================= */
+    (function(){
+      const canvas = document.getElementById('fog-canvas');
+      const heroEl = document.getElementById('hero-section');
+      const glowEl = document.getElementById('hero-mouse-glow');
+      if(!canvas || !heroEl) return;
+      const ctx = canvas.getContext('2d');
+      let W, H, RAF;
+
+      /* === Mouse state ========================= */
+      const MOUSE = {
+        x: -999, y: -999, px: -999, py: -999,
+        radius: 280, active: false, intensity: 0,
+        speed: 0
+      };
+
+      /* === Color palettes ====================== */
+      const PAL = [
+        [200,160,78],  [220,180,90],  [245,200,100], /* golds */
+        [42,157,111],  [55,180,130],  [30,120,85],   /* emeralds */
+        [160,130,70],  [180,140,60],                   /* amber */
+      ];
+
+      /* === Fog Blob ============================ */
+      class FogBlob {
+        constructor(){ this.reset(true); }
+        reset(initial){
+          this.x = Math.random() * (W||1920);
+          this.y = initial ? Math.random() * (H||1080) : -(200 + Math.random()*300);
+          this.r = 180 + Math.random() * 420;
+          this.vx = (Math.random() - 0.5) * 0.35;
+          this.vy = 0.06 + Math.random() * 0.22;
+          this.phase = Math.random() * Math.PI * 2;
+          this.breathSpeed = 0.002 + Math.random() * 0.006;
+          this.baseAlpha = 0.015 + Math.random() * 0.03;
+          this.color = PAL[Math.floor(Math.random()*PAL.length)];
+          this.hoverBoost = 0;
+          this.orbitAngle = Math.random() * Math.PI * 2;
+        }
+        update(){
+          this.phase += this.breathSpeed;
+          const breath = Math.sin(this.phase) * 0.4 + 0.6;
+          this.x += this.vx + Math.sin(this.phase * 0.7) * 0.18;
+          this.y += this.vy;
+
+          /* Mouse interaction */
+          const dx = this.x - MOUSE.x;
+          const dy = this.y - MOUSE.y;
+          const dist = Math.sqrt(dx*dx + dy*dy);
+          const reach = MOUSE.radius + this.r;
+
+          if(MOUSE.active && dist < reach){
+            const prox = 1 - dist / reach;
+            /* Strong magnetic pull toward cursor */
+            const pull = prox * 0.055 * MOUSE.intensity;
+            this.x -= dx * pull;
+            this.y -= dy * pull;
+            /* Swirl -- orbit around cursor */
+            this.orbitAngle += 0.015 * prox * MOUSE.intensity;
+            const swirlForce = prox * 1.2 * MOUSE.intensity;
+            this.x += Math.cos(this.orbitAngle) * swirlForce;
+            this.y += Math.sin(this.orbitAngle) * swirlForce;
+            /* Ramp up boost */
+            this.hoverBoost = Math.min(1, this.hoverBoost + 0.05);
+          } else {
+            this.hoverBoost = Math.max(0, this.hoverBoost - 0.012);
+          }
+
+          /* Draw with boost */
+          const sizeB = 1 + this.hoverBoost * 1.0;
+          const alphaB = 1 + this.hoverBoost * 4.0;
+          const r = this.r * (0.8 + breath * 0.4) * sizeB;
+          const alpha = this.baseAlpha * breath * alphaB;
+          const grad = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, r);
+          grad.addColorStop(0,   `rgba(${this.color[0]},${this.color[1]},${this.color[2]},${alpha})`);
+          grad.addColorStop(0.4, `rgba(${this.color[0]},${this.color[1]},${this.color[2]},${alpha*0.5})`);
+          grad.addColorStop(1,   `rgba(${this.color[0]},${this.color[1]},${this.color[2]},0)`);
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, r, 0, Math.PI * 2);
+          ctx.fillStyle = grad;
+          ctx.fill();
+
+          if(this.y - this.r > H + 80 || this.x < -this.r*2 || this.x > W+this.r*2) this.reset(false);
+        }
+      }
+
+      /* === Floating particle =================== */
+      class Particle {
+        constructor(){ this.reset(true); }
+        reset(initial){
+          this.x = Math.random() * (W||1920);
+          this.y = initial ? Math.random() * (H||1080) : H + 10;
+          this.r = 0.4 + Math.random() * 1.5;
+          this.vx = (Math.random() - 0.5) * 0.2;
+          this.vy = -(0.12 + Math.random() * 0.4);
+          this.alpha = 0.12 + Math.random() * 0.4;
+          this.phase = Math.random() * Math.PI * 2;
+          this.isGold = Math.random() > 0.35;
+        }
+        update(){
+          this.phase += 0.025;
+          this.x += this.vx + Math.sin(this.phase) * 0.12;
+          this.y += this.vy;
+
+          /* Particles scatter from cursor */
+          if(MOUSE.active){
+            const dx = this.x - MOUSE.x;
+            const dy = this.y - MOUSE.y;
+            const dist = Math.sqrt(dx*dx + dy*dy);
+            if(dist < 150){
+              const f = (1 - dist/150) * 0.7 * MOUSE.intensity;
+              this.x += dx * f * 0.05;
+              this.y += dy * f * 0.05;
+            }
+          }
+
+          const flicker = 0.6 + Math.sin(this.phase * 3) * 0.4;
+          const hMul = 1 + MOUSE.intensity * 0.8;
+          const a = this.alpha * flicker * hMul;
+
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+          ctx.fillStyle = this.isGold
+            ? `rgba(220,180,90,${a})`
+            : `rgba(55,180,130,${a})`;
+          ctx.fill();
+
+          if(this.y < -10) this.reset(false);
+        }
+      }
+
+      /* === Cursor spark (fog wisps at mouse) === */
+      class CursorSpark {
+        constructor(x, y, fast){
+          const spread = fast ? 60 : 30;
+          this.x = x + (Math.random()-0.5) * spread;
+          this.y = y + (Math.random()-0.5) * spread;
+          this.r = (fast ? 50 : 35) + Math.random() * 100;
+          this.vx = (Math.random()-0.5) * (fast ? 1.5 : 0.6);
+          this.vy = (Math.random()-0.5) * (fast ? 1.5 : 0.6);
+          this.life = 1;
+          this.decay = (fast ? 0.012 : 0.007) + Math.random() * 0.01;
+          this.color = PAL[Math.floor(Math.random()*PAL.length)];
+          this.baseAlpha = 0.05 + Math.random() * 0.08;
+        }
+        update(){
+          this.x += this.vx;
+          this.y += this.vy;
+          this.vx *= 0.99;
+          this.vy *= 0.99;
+          this.life -= this.decay;
+          if(this.life <= 0) return false;
+          const alpha = this.baseAlpha * this.life;
+          const r = this.r * (0.3 + this.life * 0.7);
+          const grad = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, r);
+          grad.addColorStop(0, `rgba(${this.color[0]},${this.color[1]},${this.color[2]},${alpha})`);
+          grad.addColorStop(0.6, `rgba(${this.color[0]},${this.color[1]},${this.color[2]},${alpha*0.3})`);
+          grad.addColorStop(1, `rgba(${this.color[0]},${this.color[1]},${this.color[2]},0)`);
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, r, 0, Math.PI * 2);
+          ctx.fillStyle = grad;
+          ctx.fill();
+          return true;
+        }
+      }
+
+      /* === Mouse trail point =================== */
+      class TrailPoint {
+        constructor(x, y){
+          this.x = x; this.y = y;
+          this.life = 1;
+          this.decay = 0.015 + Math.random() * 0.01;
+          this.r = 100 + Math.random() * 120;
+          this.color = PAL[Math.floor(Math.random()*PAL.length)];
+        }
+        update(){
+          this.life -= this.decay;
+          if(this.life <= 0) return false;
+          const alpha = 0.035 * this.life;
+          const r = this.r * (0.5 + this.life * 0.5);
+          const grad = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, r);
+          grad.addColorStop(0, `rgba(${this.color[0]},${this.color[1]},${this.color[2]},${alpha})`);
+          grad.addColorStop(1, `rgba(${this.color[0]},${this.color[1]},${this.color[2]},0)`);
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, r, 0, Math.PI * 2);
+          ctx.fillStyle = grad;
+          ctx.fill();
+          return true;
+        }
+      }
+
+      /* === Scene setup ========================= */
+      let blobs = [], particles = [], sparks = [], trail = [];
+      const BLOB_COUNT = 18;
+      const PARTICLE_COUNT = 80;
+      let sparkTimer = 0, trailTimer = 0, frame = 0;
+
+      function resize(){
+        const hero = canvas.parentElement;
+        W = canvas.width = hero.offsetWidth;
+        H = canvas.height = hero.offsetHeight;
+        blobs = []; particles = [];
+        for(let i=0; i<BLOB_COUNT; i++) blobs.push(new FogBlob());
+        for(let i=0; i<PARTICLE_COUNT; i++) particles.push(new Particle());
+      }
+
+      function draw(){
+        ctx.clearRect(0,0,W,H);
+        frame++;
+
+        /* Smooth intensity ramp */
+        const target = MOUSE.active ? 1 : 0;
+        MOUSE.intensity += (target - MOUSE.intensity) * 0.045;
+
+        /* Calculate mouse speed */
+        if(MOUSE.active && MOUSE.px > 0){
+          const mdx = MOUSE.x - MOUSE.px;
+          const mdy = MOUSE.y - MOUSE.py;
+          MOUSE.speed = Math.sqrt(mdx*mdx + mdy*mdy);
+        } else {
+          MOUSE.speed *= 0.9;
+        }
+        MOUSE.px = MOUSE.x; MOUSE.py = MOUSE.y;
+
+        const isFast = MOUSE.speed > 4;
+
+        /* Spawn cursor sparks */
+        if(MOUSE.active && MOUSE.x > 0){
+          sparkTimer++;
+          const rate = isFast ? 1 : 2;
+          if(sparkTimer % rate === 0 && sparks.length < 50){
+            sparks.push(new CursorSpark(MOUSE.x, MOUSE.y, isFast));
+          }
+        }
+
+        /* Mouse trail -- leave fog wisps behind */
+        if(MOUSE.active && MOUSE.x > 0){
+          trailTimer++;
+          if(trailTimer % 4 === 0 && trail.length < 40){
+            trail.push(new TrailPoint(MOUSE.x, MOUSE.y));
+          }
+        }
+
+        /* == Cursor aura (dual layer) =========== */
+        if(MOUSE.intensity > 0.01 && MOUSE.x > 0){
+          /* Inner bright aura */
+          const a1 = 0.09 * MOUSE.intensity;
+          const r1 = 200 + MOUSE.speed * 3;
+          const g1 = ctx.createRadialGradient(MOUSE.x, MOUSE.y, 0, MOUSE.x, MOUSE.y, r1);
+          g1.addColorStop(0, `rgba(200,160,78,${a1})`);
+          g1.addColorStop(0.35, `rgba(42,157,111,${a1 * 0.5})`);
+          g1.addColorStop(1, `rgba(42,157,111,0)`);
+          ctx.beginPath(); ctx.arc(MOUSE.x, MOUSE.y, r1, 0, Math.PI*2);
+          ctx.fillStyle = g1; ctx.fill();
+
+          /* Outer pulsing haze */
+          const pulse = 0.7 + Math.sin(frame * 0.03) * 0.3;
+          const a2 = 0.04 * MOUSE.intensity * pulse;
+          const r2 = 400 + Math.sin(frame * 0.02) * 30;
+          const g2 = ctx.createRadialGradient(MOUSE.x, MOUSE.y, 0, MOUSE.x, MOUSE.y, r2);
+          g2.addColorStop(0, `rgba(200,160,78,${a2})`);
+          g2.addColorStop(0.5, `rgba(42,157,111,${a2 * 0.4})`);
+          g2.addColorStop(1, `rgba(0,0,0,0)`);
+          ctx.beginPath(); ctx.arc(MOUSE.x, MOUSE.y, r2, 0, Math.PI*2);
+          ctx.fillStyle = g2; ctx.fill();
+        }
+
+        /* Fog blobs (additive blend) */
+        ctx.globalCompositeOperation = 'lighter';
+        for(const b of blobs) b.update();
+
+        /* Sparks + trail */
+        sparks = sparks.filter(s => s.update());
+        trail = trail.filter(t => t.update());
+
+        /* Particles (normal blend) */
+        ctx.globalCompositeOperation = 'source-over';
+        for(const p of particles) p.update();
+
+        RAF = requestAnimationFrame(draw);
+      }
+
+      /* === Events ============================== */
+      heroEl.addEventListener('mousemove', e => {
+        const rect = heroEl.getBoundingClientRect();
+        MOUSE.x = e.clientX - rect.left;
+        MOUSE.y = e.clientY - rect.top;
+        MOUSE.active = true;
+        if(glowEl){
+          glowEl.style.setProperty('--mx', MOUSE.x + 'px');
+          glowEl.style.setProperty('--my', MOUSE.y + 'px');
+        }
+      });
+      heroEl.addEventListener('mouseleave', () => {
+        MOUSE.active = false;
+        MOUSE.x = -999; MOUSE.y = -999;
+      });
+      window.addEventListener('resize', () => { cancelAnimationFrame(RAF); resize(); draw(); });
+      resize(); draw();
+    })();
+  </script>
+  <script>
+    (function(){
+      const heroEl = document.getElementById('hero-section');
+      const glowEl = document.getElementById('hero-mouse-glow');
+      const trailCanvas = document.getElementById('trail-canvas');
+      if(!heroEl || !trailCanvas) return;
+      const ctx = trailCanvas.getContext('2d');
+      
+      let width, height;
+      function resize() {
+        width = trailCanvas.width = heroEl.offsetWidth;
+        height = trailCanvas.height = heroEl.offsetHeight;
+      }
+      window.addEventListener('resize', resize);
+      resize();
+
+      const numPoints = 25;
+      const points = Array.from({length: numPoints}, () => ({x: width/2, y: height/2, vx: 0, vy: 0}));
+      
+      let mouseActive = false;
+      let targetX = width/2;
+      let targetY = height/2;
+
+      heroEl.addEventListener('mousemove', e => {
+        let rect = heroEl.getBoundingClientRect();
+        targetX = e.clientX - rect.left;
+        targetY = e.clientY - rect.top;
+        mouseActive = true;
+        if(glowEl){
+          glowEl.style.setProperty('--mx', targetX + 'px');
+          glowEl.style.setProperty('--my', targetY + 'px');
+        }
+      });
+
+      heroEl.addEventListener('mouseleave', () => {
+        mouseActive = false;
+        if(glowEl){
+          glowEl.style.setProperty('--mx', '50%');
+          glowEl.style.setProperty('--my', '50%');
+        }
+      });
+
+      const stiffness = 0.5;
+      const damping = 0.45;
+
+      function render() {
+        ctx.clearRect(0, 0, width, height);
+        
+        points[0].x += (targetX - points[0].x) * 0.4;
+        points[0].y += (targetY - points[0].y) * 0.4;
+        
+        for(let i=1; i<numPoints; i++){
+          let p = points[i];
+          let prev = points[i-1];
+          let dx = prev.x - p.x;
+          let dy = prev.y - p.y;
+          p.vx += dx * stiffness;
+          p.vy += dy * stiffness;
+          p.vx *= damping;
+          p.vy *= damping;
+          p.x += p.vx;
+          p.y += p.vy;
+        }
+
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        
+        for(let i=1; i<numPoints; i++){
+          ctx.beginPath();
+          ctx.moveTo(points[i-1].x, points[i-1].y);
+          ctx.lineTo(points[i].x, points[i].y);
+          const ratio = 1 - (i / numPoints);
+          ctx.strokeStyle = `rgba(200, 160, 78, ${mouseActive ? ratio * 0.8 : ratio * 0.1})`;
+          ctx.lineWidth = ratio * 12; 
+          ctx.stroke();
+        }
+        
+        requestAnimationFrame(render);
+      }
+      render();
+    })();
+  </script>
+</body>
+</html>
+
