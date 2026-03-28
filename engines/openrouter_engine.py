@@ -230,28 +230,32 @@ class OpenRouterEngine(SentimentEngine):
         "You are a product analyst. Given a product name, use your knowledge to provide a comprehensive analysis.\n\n"
         "Return ONLY valid JSON (no markdown fences, no extra text) in this exact format:\n"
         "{\n"
-        '  "product_name": "Full official product name",\n'
-        '  "description": "2-3 sentence product description",\n'
-        '  "overall_rating": 4.2,\n'
+        '  "product_name": "<Full official product name>",\n'
+        '  "description": "<2-3 sentence product description>",\n'
+        '  "overall_rating": <float, e.g., 4.2>,\n'
         '  "prices": [\n'
-        '    {"source": "Amazon", "price": "₹599", "note": "Current price"},\n'
-        '    {"source": "Flipkart", "price": "₹549", "note": "Best deal"}\n'
+        '    {"source": "<e.g., Amazon>", "price": "<e.g., ₹75,000>", "note": "<e.g., Current price>"},\n'
+        '    {"source": "<e.g., Flipkart>", "price": "<e.g., ₹74,500>", "note": "<e.g., Best deal>"}\n'
         "  ],\n"
         '  "reviews": [\n'
-        '    {"text": "Representative review text...", "label": "POSITIVE", "score": 0.9, "confidence": 0.95},\n'
-        '    {"text": "...", "label": "NEGATIVE", "score": -0.7, "confidence": 0.85}\n'
+        '    {"text": "<Representative review 1 text...>", "label": "POSITIVE", "score": 0.9, "confidence": 0.95},\n'
+        '    {"text": "<Representative review 2 text...>", "label": "NEGATIVE", "score": -0.7, "confidence": 0.85},\n'
+        '    {"text": "<Representative review 3 text...>", "label": "NEUTRAL", "score": 0.0, "confidence": 0.80},\n'
+        '    {"text": "<Representative review 4 text...>", "label": "POSITIVE", "score": 0.8, "confidence": 0.90},\n'
+        '    {"text": "<Representative review 5 text...>", "label": "NEGATIVE", "score": -0.5, "confidence": 0.85}\n'
         "  ],\n"
-        '  "recommendation": {"verdict": "BUY", "confidence": 0.85, "explanation": "2-3 sentence explanation"},\n'
-        '  "trust": {"trust_score": 0.75, "trust_notes": "Brief note about review authenticity"}\n'
+        '  "recommendation": {"verdict": "<BUY/DON\'T BUY/MIXED>", "confidence": <float>, "explanation": "<2-3 sentence explanation>"},\n'
+        '  "trust": {"trust_score": <float>, "trust_notes": "<Brief note about review authenticity>"}\n'
         "}\n\n"
         "Rules:\n"
-        "- Generate exactly 5 realistic representative reviews matching what real buyers typically say\n"
-        "- Include 2-3 price sources with Indian Rupee prices\n"
-        "- overall_rating is out of 5.0\n"
-        "- labels must be POSITIVE, NEGATIVE, or NEUTRAL\n"
-        "- score range: -1.0 to 1.0\n"
-        "- confidence range: 0.0 to 1.0\n"
-        "- verdict must be BUY, DON'T BUY, or MIXED"
+        "- Provide ACCURATE, realistic prices based on the actual real-world cost of the product (e.g., a flagship smartphone like an S23 costs around ₹60,000-₹80,000, not ₹599).\n"
+        "- Generate exactly 5 distinct, realistic representative reviews matching what real buyers typically say.\n"
+        "- Include 2-3 price sources with accurate Indian Rupee prices (₹).\n"
+        "- overall_rating is out of 5.0.\n"
+        "- labels must be POSITIVE, NEGATIVE, or NEUTRAL.\n"
+        "- score range: -1.0 to 1.0.\n"
+        "- confidence range: 0.0 to 1.0.\n"
+        "- verdict must be BUY, DON'T BUY, or MIXED."
     )
 
     def analyze_product(self, product_name: str) -> dict:
